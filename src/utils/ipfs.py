@@ -30,7 +30,7 @@ def add_file(name):
 def get_file(hash):
     api = get_ipfs_connection()
     try:
-        data = api.cat(hash)
+        data = api.get(hash)
         return data, True
     except ipfsapi.exceptions.ConnectionError as ce:
         return None, False
