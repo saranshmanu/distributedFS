@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, request, render_template, jsonify
 from flask_compress import Compress
 from src.settings import URL, SERVER_PORT
-from src.utils.ipfs import add_file
+from src.utils.ipfs import add_file, get_ipfs_config
 import os
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ Compress(app)
 
 # add file to the IPFS network
 @app.route('/add', methods=['POST'])
-def render():
+def add():
     file = request.files['file']
     filename = file.filename
     file_path = os.path.join(filename)
@@ -24,6 +24,11 @@ def render():
             "file": filename, 
             "message": 'File Not Found!'
         })
+
+# get config of IPFS network
+@app.route('/config', methods=['GET'])
+def config():
+    return jsonify(get_ipfs_config())
 
 # 404 path not found error handling
 @app.errorhandler(404)

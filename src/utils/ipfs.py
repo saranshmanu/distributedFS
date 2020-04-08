@@ -13,6 +13,10 @@ def connect_ipfs():
 def get_ipfs_connection():
     return ipfsapi.connect('127.0.0.1', 5001)
 
+def get_ipfs_config():
+    api = get_ipfs_connection()
+    return api.id()
+
 # add file to the IPFS network
 def add_file(name):
     api = get_ipfs_connection()
