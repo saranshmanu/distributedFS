@@ -3,10 +3,21 @@ from flask_compress import Compress
 from src.settings import URL, SERVER_PORT
 from src.utils.ipfs import add_file, get_file, get_ipfs_config
 from src.utils.auth import generate_keys, encrypt_file, decrypt_file
+from src.utils.file_manager import read_file, write_file
+
 import os
 
 app = Flask(__name__)
 Compress(app)
+
+
+def create_response(error, data, message):
+    return {
+        "success": not(error),
+        "message": message,
+        "data": data
+    }
+
 
 @app.route('/generate-keys', methods=['GET'])
 def generate():
@@ -23,34 +34,23 @@ def add():
     filename = file.filename
     file_path = os.path.join(filename)
     file.save(file_path)
-    # open the message
-    data = open(file_path, 'rb')
-    message = data.read()
-    data.close()
-    # encrypt the data using the generated keys
     private_key, public_key = generate_keys()
+    status, message = read_file(file_path)
     encrypted_data = encrypt_file(message, public_key)
-    # write encrypted data
-    data = open(file_path + '.encrypted', 'wb')
+    data = open(file_path, 'wb')
     data.write(encrypted_data)
     data.close()
-    response, status = add_file(filename + '.encrypted')
+    response, status = add_file(file_path)
     os.remove(file_path)
-    os.remove(file_path + '.encrypted')
-    response["private-key"] = str(private_key)
+    response["keys"] = {
+        "private": str(private_key),
+        "public": str(public_key)
+    }
     response["encrypted-data"] = str(encrypted_data)
     if status:
-        return jsonify({
-            "success": True,
-            "data": response,
-            "message": 'Encrypted the data!'
-        })
+        return jsonify(create_response(False, response, 'Encrypted the data!'))
     else:
-        return jsonify({
-            "status": status,
-            "file": filename, 
-            "message": 'File Not Found!'
-        })
+        return jsonify(create_response(True, {"file": file_path}, 'File Not Found!'))
 
 # add file to the IPFS network
 @app.route('/get', methods=['GET'])
@@ -58,32 +58,15 @@ def get():
     hash = request.json['hash']
     private_key = request.json['private-key']
     response, status = get_file(hash)
-    filename = hash
-    file_path = os.path.join(filename)
-    data = open(file_path, 'rb')
-    message = data.read()
-    data.close()
-    try: 
+    file_path = os.path.join(hash)
+    try:
+        status, message = read_file(file_path)
         decrypted_data = decrypt_file(message, private_key)
         os.remove(file_path)
-        if status:
-            return jsonify({
-                "success": True,
-                "data": str(decrypted_data),
-                "message": 'Decrypted the data!'
-            })
-        else:
-            return jsonify({
-                "status": status,
-                "message": 'File Not Found!'
-            })
+        return jsonify(create_response(False, str(decrypted_data), 'Decrypted the data!'))
     except Exception as inst:
         os.remove(file_path)
-        return jsonify({
-            "status": False,
-            "data": None,
-            "message": str(inst)
-        })
+        return jsonify(create_response(True, None, 'Error while fetching the data!'))
 
 # get config of IPFS network
 @app.route('/config', methods=['GET'])
