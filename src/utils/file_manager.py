@@ -7,13 +7,12 @@ def read_file(file_path):
     except Exception as inst:
         return False, None
 
-def write_file(file_path, data):
-    try: 
+def write_file(file_path, message):
+    try:
         data = open(file_path, 'wb')
-        data.write(data)
+        data.write(message)
         data.close()
         return True
     except Exception as inst:
         print(str(inst))
         return False
-    

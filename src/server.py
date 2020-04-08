@@ -2,7 +2,7 @@ from flask import Flask, redirect, url_for, request, render_template, jsonify
 from flask_compress import Compress
 from src.settings import URL, SERVER_PORT
 from src.utils.ipfs import add_file, get_file, get_ipfs_config
-from src.utils.auth import generate_keys, encrypt_file, decrypt_file
+from src.utils.cryptography import generate_keys, encrypt_file, decrypt_file
 from src.utils.file_manager import read_file, write_file
 
 import os
@@ -37,9 +37,7 @@ def add():
     private_key, public_key = generate_keys()
     status, message = read_file(file_path)
     encrypted_data = encrypt_file(message, public_key)
-    data = open(file_path, 'wb')
-    data.write(encrypted_data)
-    data.close()
+    write_file(file_path, encrypted_data)
     response, status = add_file(file_path)
     os.remove(file_path)
     response["keys"] = {
