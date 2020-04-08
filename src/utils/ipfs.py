@@ -25,3 +25,12 @@ def add_file(name):
         return new_file, True
     except ipfsapi.exceptions.ConnectionError as ce:
         return None, False
+
+# get file from the IPFS network
+def get_file(hash):
+    api = get_ipfs_connection()
+    try:
+        data = api.cat(hash)
+        return data, True
+    except ipfsapi.exceptions.ConnectionError as ce:
+        return None, False

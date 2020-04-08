@@ -1,11 +1,20 @@
 from flask import Flask, redirect, url_for, request, render_template, jsonify
 from flask_compress import Compress
 from src.settings import URL, SERVER_PORT
-from src.utils.ipfs import add_file, get_ipfs_config
+from src.utils.ipfs import add_file, get_file, get_ipfs_config
+from src.utils.auth import generate_keys
 import os
 
 app = Flask(__name__)
 Compress(app)
+
+@app.route('/generate-keys', methods=['GET'])
+def generate():
+    private_key, public_key = generate_keys()
+    return jsonify({
+        "private-key": str(private_key),
+        "public-key": str(public_key)
+    })
 
 # add file to the IPFS network
 @app.route('/add', methods=['POST'])
@@ -22,6 +31,19 @@ def add():
         return jsonify({
             "status": status,
             "file": filename, 
+            "message": 'File Not Found!'
+        })
+
+# add file to the IPFS network
+@app.route('/get', methods=['GET'])
+def get():
+    hash = request.json['hash']
+    response, status = get_file(hash)
+    if status:
+        return response
+    else:
+        return jsonify({
+            "status": status,
             "message": 'File Not Found!'
         })
 
