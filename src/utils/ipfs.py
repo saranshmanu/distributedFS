@@ -34,3 +34,21 @@ def get_file(hash):
         return data, True
     except ipfsapi.exceptions.ConnectionError as ce:
         return None, False
+
+# add JSON to the IPFS network
+def add_json(json):
+    api = get_ipfs_connection()
+    try:
+        response = api.add_json(json)
+        return response, True
+    except ipfsapi.exceptions.ConnectionError as ce:
+        return None, False
+
+# get JSON from the IPFS network
+def get_json(hash):
+    api = get_ipfs_connection()
+    try:
+        data = api.get_json(hash)
+        return data, True
+    except ipfsapi.exceptions.ConnectionError as ce:
+        return None, False
