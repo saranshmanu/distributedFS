@@ -1,10 +1,10 @@
 from flask import Flask, redirect, url_for, request, render_template, jsonify
 from flask_compress import Compress
 from src.settings import URL, SERVER_PORT
-from src.utils.ipfs import add_file, get_file, get_ipfs_config
-from src.utils.cryptography import generate_keys, encrypt_file, decrypt_file
-from src.utils.file_manager import read_file, write_file
-from src.utils.auth import create_user, get_user_keys, get_user_public_key
+from src.utils.ipfs import get_ipfs_config
+from src.utils.cryptography import generate_keys
+from src.utils.file_manager import write_file_to_ipfs, read_file_from_ipfs
+from src.utils.auth import create_user, get_user_keys
 
 import os
 
@@ -51,20 +51,11 @@ def get_keys():
 def add():
     file = request.files['file']
     receiver_hash = request.form['receiver-hash']
-    receiver_public_key = get_user_public_key(receiver_hash)
-    filename = file.filename
-    file_path = os.path.join(filename)
-    file.save(file_path)
-    status, message = read_file(file_path)
-    encrypted_data = encrypt_file(message, receiver_public_key)
-    write_file(file_path, encrypted_data)
-    response, status = add_file(file_path)
-    os.remove(file_path)
-    response["encrypted-data"] = str(encrypted_data)
-    if status:
+    try:
+        response = write_file_to_ipfs(file, receiver_hash)
         return jsonify(create_response(False, response, 'Encrypted the data!'))
-    else:
-        return jsonify(create_response(True, {"file": file_path}, 'File Not Found!'))
+    except Exception as inst:
+        return jsonify(create_response(True, str(inst), 'Error while adding the data!'))
 
 # add file to the IPFS network
 @app.route('/get', methods=['GET'])
@@ -72,18 +63,11 @@ def get():
     file_hash = request.json['file-hash']
     user_hash = request.json['user-hash']
     user_password = request.json['user-password']
-    response, status = get_file(file_hash)
-    file_path = os.path.join(file_hash)
     try:
-        keys = get_user_keys(user_hash, user_password)
-        private_key = keys["ipfs-object"]["private-key"]
-        status, message = read_file(file_path)
-        decrypted_data = decrypt_file(message, private_key)
-        os.remove(file_path)
+        decrypted_data = read_file_from_ipfs(file_hash, user_hash, user_password)
         return jsonify(create_response(False, str(decrypted_data), 'Decrypted the data!'))
     except Exception as inst:
-        os.remove(file_path)
-        return jsonify(create_response(True, None, 'Error while fetching the data!'))
+        return jsonify(create_response(True, str(inst), 'Error while fetching the data!'))
 
 # get config of IPFS network
 @app.route('/config', methods=['GET'])
