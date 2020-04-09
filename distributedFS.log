@@ -1,0 +1,14 @@
+2020-04-09 19:26:30.950 INFO _internal - _log:  * Detected change in '/Users/saranshmittal/S20/DistributedFS/src/utils/logger.py', reloading
+INFO:werkzeug: * Restarting with stat
+2020-04-09 19:26:32.429 WARNING _internal - _log:  * Debugger is active!
+2020-04-09 19:26:32.438 INFO _internal - _log:  * Debugger PIN: 714-287-276
+2020-04-09 19:26:35.719 INFO _internal - _log: 127.0.0.1 - - [09/Apr/2020 19:26:35] "[37mGET /generate-keys HTTP/1.1[0m" 200 -
+2020-04-09 19:26:40.778 DEBUG connectionpool - _new_conn: Starting new HTTP connection (1): 127.0.0.1:5001
+2020-04-09 19:26:40.782 DEBUG connectionpool - _make_request: http://127.0.0.1:5001 "GET /api/v0/version?stream-channels=true HTTP/1.1" 200 None
+2020-04-09 19:26:40.794 DEBUG connectionpool - _new_conn: Starting new HTTP connection (1): 127.0.0.1:5001
+2020-04-09 19:26:40.804 DEBUG connectionpool - _make_request: http://127.0.0.1:5001 "GET /api/v0/get?stream-channels=true&archive=true&compress=true&arg=QmXmN1ttvf7D7bLUiipuiYBxiogrtbdVxTbU6f4LfjS7Ef HTTP/1.1" 200 None
+2020-04-09 19:26:40.814 DEBUG connectionpool - _new_conn: Starting new HTTP connection (1): 127.0.0.1:5001
+2020-04-09 19:26:40.818 DEBUG connectionpool - _make_request: http://127.0.0.1:5001 "GET /api/v0/version?stream-channels=true HTTP/1.1" 200 None
+2020-04-09 19:26:40.825 DEBUG connectionpool - _new_conn: Starting new HTTP connection (1): 127.0.0.1:5001
+2020-04-09 19:26:40.830 DEBUG connectionpool - _make_request: http://127.0.0.1:5001 "GET /api/v0/cat?stream-channels=true&arg=QmTiiAqwX5rLDg2TwzRGV3QpD5phg9jdPY3jac1uP9aTTo HTTP/1.1" 200 None
+2020-04-09 19:26:41.262 INFO _internal - _log: 127.0.0.1 - - [09/Apr/2020 19:26:41] "[37mGET /get HTTP/1.1[0m" 200 -

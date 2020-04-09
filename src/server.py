@@ -5,13 +5,14 @@ from src.utils.ipfs import get_ipfs_config
 from src.utils.cryptography import generate_keys
 from src.utils.file_manager import write_file_to_ipfs, read_file_from_ipfs
 from src.utils.auth import create_user, get_user_keys
+from src.utils.logger import log_information
 
 import os
 
 app = Flask(__name__)
 Compress(app)
 
-
+@log_information
 def create_response(error, data, message):
     return {
         "success": not(error),
@@ -19,7 +20,7 @@ def create_response(error, data, message):
         "data": data
     }
 
-
+@log_information
 @app.route('/generate-keys', methods=['GET'])
 def generate():
     private_key, public_key = generate_keys()
@@ -28,6 +29,7 @@ def generate():
         "public-key": str(public_key)
     })
 
+@log_information
 @app.route('/create-user', methods=['GET'])
 def create():
     try:
@@ -36,6 +38,7 @@ def create():
     except Exception as inst:
         return jsonify(create_response(True, None, str(inst)))
 
+@log_information
 @app.route('/get-user-keys', methods=['GET'])
 def get_keys():
     try:
@@ -47,6 +50,7 @@ def get_keys():
         return jsonify(create_response(True, None, str(inst)))
 
 # add file to the IPFS network
+@log_information
 @app.route('/add', methods=['POST'])
 def add():
     file = request.files['file']
@@ -58,6 +62,7 @@ def add():
         return jsonify(create_response(True, str(inst), 'Error while adding the data!'))
 
 # add file to the IPFS network
+@log_information
 @app.route('/get', methods=['GET'])
 def get():
     file_hash = request.json['file-hash']
@@ -70,11 +75,13 @@ def get():
         return jsonify(create_response(True, str(inst), 'Error while fetching the data!'))
 
 # get config of IPFS network
+@log_information
 @app.route('/config', methods=['GET'])
 def config():
     return jsonify(get_ipfs_config())
 
 # 404 path not found error handling
+@log_information
 @app.errorhandler(404)
 def page_not_found(e):
     return jsonify({
@@ -83,6 +90,7 @@ def page_not_found(e):
     })
 
 # 405 method not found error handling
+@log_information
 @app.errorhandler(405)
 def page_not_found(e):
     return jsonify({
