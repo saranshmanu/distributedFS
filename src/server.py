@@ -4,6 +4,7 @@ from src.settings import URL, SERVER_PORT
 from src.utils.ipfs import add_file, get_file, get_ipfs_config
 from src.utils.cryptography import generate_keys, encrypt_file, decrypt_file
 from src.utils.file_manager import read_file, write_file
+from src.utils.auth import create_user, get_user_keys
 
 import os
 
@@ -26,6 +27,24 @@ def generate():
         "private-key": str(private_key),
         "public-key": str(public_key)
     })
+
+@app.route('/create-user', methods=['GET'])
+def create():
+    try:
+        response = create_user()
+        return jsonify(create_response(False, response, 'Successfully Created User!'))
+    except Exception as inst:
+        return jsonify(create_response(True, None, str(inst)))
+
+@app.route('/get-user-keys', methods=['GET'])
+def get_keys():
+    try:
+        hash = request.json['hash']
+        password = request.json['password']
+        response = get_user_keys(hash, password)
+        return jsonify(create_response(False, response, 'Successfully Fetched User Keys from the IPFS network!'))
+    except Exception as inst:
+        return jsonify(create_response(True, None, str(inst)))
 
 # add file to the IPFS network
 @app.route('/add', methods=['POST'])
