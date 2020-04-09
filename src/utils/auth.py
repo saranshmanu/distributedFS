@@ -29,3 +29,8 @@ def get_user_keys(hash, password):
         "user-hash": hash,
         "ipfs-object": object
     }
+
+def get_user_public_key(hash):
+    object, status = get_json(hash)
+    public_key = object['public-key']
+    return public_key

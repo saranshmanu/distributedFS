@@ -4,7 +4,7 @@ from src.settings import URL, SERVER_PORT
 from src.utils.ipfs import add_file, get_file, get_ipfs_config
 from src.utils.cryptography import generate_keys, encrypt_file, decrypt_file
 from src.utils.file_manager import read_file, write_file
-from src.utils.auth import create_user, get_user_keys
+from src.utils.auth import create_user, get_user_keys, get_user_public_key
 
 import os
 
@@ -50,19 +50,16 @@ def get_keys():
 @app.route('/add', methods=['POST'])
 def add():
     file = request.files['file']
+    receiver_hash = request.form['receiver-hash']
+    receiver_public_key = get_user_public_key(receiver_hash)
     filename = file.filename
     file_path = os.path.join(filename)
     file.save(file_path)
-    private_key, public_key = generate_keys()
     status, message = read_file(file_path)
-    encrypted_data = encrypt_file(message, public_key)
+    encrypted_data = encrypt_file(message, receiver_public_key)
     write_file(file_path, encrypted_data)
     response, status = add_file(file_path)
     os.remove(file_path)
-    response["keys"] = {
-        "private": str(private_key),
-        "public": str(public_key)
-    }
     response["encrypted-data"] = str(encrypted_data)
     if status:
         return jsonify(create_response(False, response, 'Encrypted the data!'))
@@ -72,11 +69,14 @@ def add():
 # add file to the IPFS network
 @app.route('/get', methods=['GET'])
 def get():
-    hash = request.json['hash']
-    private_key = request.json['private-key']
-    response, status = get_file(hash)
-    file_path = os.path.join(hash)
+    file_hash = request.json['file-hash']
+    user_hash = request.json['user-hash']
+    user_password = request.json['user-password']
+    response, status = get_file(file_hash)
+    file_path = os.path.join(file_hash)
     try:
+        keys = get_user_keys(user_hash, user_password)
+        private_key = keys["ipfs-object"]["private-key"]
         status, message = read_file(file_path)
         decrypted_data = decrypt_file(message, private_key)
         os.remove(file_path)
