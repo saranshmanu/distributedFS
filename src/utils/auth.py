@@ -5,7 +5,6 @@ from src.utils.cryptography import generate_keys, encrypt_object, decrypt_object
 def create_user():
     private_key, public_key = generate_keys() # str object
     encrypted_private_key, password = encrypt_object(private_key) # byte object
-    print(encrypted_private_key)
     object = {
         "private-key": encrypted_private_key,
         "public-key": public_key

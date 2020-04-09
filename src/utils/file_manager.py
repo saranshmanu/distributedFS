@@ -14,5 +14,4 @@ def write_file(file_path, message):
         data.close()
         return True
     except Exception as inst:
-        print(str(inst))
         return False
